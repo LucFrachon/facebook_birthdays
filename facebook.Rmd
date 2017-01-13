@@ -68,6 +68,24 @@ print(fb_grp[fb_grp$dates == ymd("2014-02-23"), ])
 
 So my birthday is actually a fairly busy day, with 7 people sharing it.
 
+Are there any days without birthdays? 
+
+```{r}
+# Number of unique dates in the dataset:
+length(unique(fb$dates))
+```
+
+According to this, there are 17 days where nobody in the sample was born.
+
+To see them, we need to generate a vector of all the days in the year, then look at the set differences between this vector and the one containing birthdays. 
+
+*Note*: In theory and to make sure we capture every possible day, we have to do this for a leap year (such as 2016). However the dataset uses 2014 as the year for all birthdays and therefore does not contain any on February 29th, so we can ignore this detail.
+
+```{r}
+all_days <- seq(ymd("2014-01-01"), ymd("2014-12-31"), 3600 * 24)
+as.POSIXct(setdiff(all_days, fb$dates), tz = "GMT", origin = "1970-01-01")
+```
+
 # Analysis by month
 
 We will now look into the data in more detail by breaking it down by month and calendar day. To that end, let's transform the dataset:
@@ -83,8 +101,38 @@ How are birthdays distributed by month?
 ```{r}
 qplot(x = b_month, data = fb_md, binwidth = 1,
       color = I('black'), fill = I('thistle')) +
-    scale_x_continuous(limits = c(1, 12), breaks = seq(1, 12, 1)) +
-    xlab("Month") + ylab("Birthday count")
+    scale_x_continuous(limits = c(0, 13), breaks = seq(1, 12, 1)) +
+    xlab("Month") + ylab("Birthday Count") +
     theme_minimal()
 ```
+
+March is the month with the most birthdays. Let's count them:
+```{r}
+sum(fb_md$b_month == 3)
+```
+
+May and December seem tied for last position:
+```{r}
+sum(fb_md$b_month == 5)
+sum(fb_md$b_month == 12)
+```
+
+And indeed they are, at 72 each.
+
+# Analysis by day of the month
+
+How are birthdays distributed by day in the month? Are there any patterns (we would expect not)?
+
+```{r}
+qplot(x = b_day, data = fb_md, binwidth = 1,
+      color = I('black'), fill = I('thistle')) +
+    scale_x_continuous(limits = c(0, 32), breaks = seq(1, 31, 1)) +
+    xlab("Day of the Month") + ylab("Birthday Count") +
+    theme_minimal()
+```
+
+Obviously the 31st has less birthdays than any other day because only 7 months out of 12 have that many days.
+There is a large peak on the 14th which is quite surprising. It could just be due to random noise, but it might also not be a coincidence that the data was generated in 2014. Could it be that somewhere in the generation process, the day and year got mixed up? We cannot answer this question without knowing more about how the dataset was created.
+
+# Conclusion
 
