@@ -1,0 +1,67 @@
+---
+title: "Facebook Birthdays - Exploratory Analysis"
+author: "Luc Frachon"
+date: "13 janvier 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(lubridate)
+require(ggplot2)
+require(dplyr)
+```
+
+# Introduction
+
+This short project is part of Udacity's "Data Analysis with R" course. It aims at exploring and drawing conclusions from a dataset containing birthdays of Facebook friends.
+
+Since I closed my Facebook account many years ago, I used a [mock dataset](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/birthdaysExample.csv) provided by Udacity. These data do not contain any information wih regards to birth year, only day and month. This will limit the scope of this analysis somewhat, but the essential work will remain the same.
+
+# Load Data
+
+I first load the data and look at its structure.
+```{r}
+fb <- read.csv('./birthdaysExample.csv', stringsAsFactors = FALSE)
+str(fb)
+```
+
+As expected, all the dates have been imported as strings, so we now need to do some work to turn them into dates. The lubridate package makes this task very easy:
+
+```{r}
+fb$dates <- mdy(fb$dates)
+str(fb)
+```
+
+# Overall birthday distribution
+
+Before going further, we can take a look at the distribution of birthdays by week along the year, using a histogram:
+
+```{r}
+binw_days <- 7
+qplot(x = dates, data = fb, binwidth = 24 * 3600 * binw_days, 
+      color = I("black"),
+      fill = I("thistle")) +  # Convert bin width to seconds
+    theme_minimal()
+```
+
+There are some peaks and valleys such as in March (peak) and July/August (valley) but no obvious pattern.
+
+# Individual birthdays
+
+Let's look for the days with the most birthdays:
+```{r}
+fb_grp <- fb %>% group_by(dates) %>% summarise(count = n())
+max_count <- max(fb_grp$count)
+# Most birthdays:
+print(fb_grp[fb_grp$count == max_count, ])
+```
+
+3 of the days days have 8 birthdays each.
+
+Out of curiosity, let's see how many 'friends' share my birthday (February 23rd):
+```{r}
+print(fb_grp[fb_grp$dates == ymd("2014-02-23"), ])
+```
+
+So my birthday is actually a fairly busy day, with 7 people sharing it.
