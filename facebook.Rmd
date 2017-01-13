@@ -75,15 +75,14 @@ Are there any days without birthdays?
 length(unique(fb$dates))
 ```
 
-According to this, there are 17 days where nobody in the sample was born.
-
-To see them, we need to generate a vector of all the days in the year, then look at the set differences between this vector and the one containing birthdays. 
+According to this, there are 17 days where nobody in the sample was born. To see them, we need to generate a vector of all the days in the year, then look at the set differences between this vector and the one containing birthdays. 
 
 *Note*: In theory and to make sure we capture every possible day, we have to do this for a leap year (such as 2016). However the dataset uses 2014 as the year for all birthdays and therefore does not contain any on February 29th, so we can ignore this detail.
 
 ```{r}
-all_days <- seq(ymd("2014-01-01"), ymd("2014-12-31"), 3600 * 24)
-as.POSIXct(setdiff(all_days, fb$dates), tz = "GMT", origin = "1970-01-01")
+all_days <- seq(ymd("2014-01-01", tz = "UTC"), ymd("2014-12-31", tz = "UTC"), 3600 * 24)
+no_bdays <- as.POSIXct(setdiff(all_days, fb$dates), tz = "UTC", origin = "1970-01-01")
+print(no_bdays)
 ```
 
 # Analysis by month
@@ -136,3 +135,9 @@ There is a large peak on the 14th which is quite surprising. It could just be du
 
 # Conclusion
 
+From this dataset of 1033 'friends', we were able to draw the following conclusions:
+
+ * There does not seem to be an obvious pattern to the distribution of birthdays thoughout the year but there are peaks especially in March, and valleys in the summer time,
+ * There are 17 days in the year where no one in the sample was born,
+ * March is the month with the most birthdays while May and December are the most quiet months in terms of birthdays
+ * Finally, there is an intersting peak on the 14th day of the month when looking at how birthdays are distributed accross a typical month. The fact that the data was generated precisely in '14 might be a coincidence or a flaw in the generation process.
