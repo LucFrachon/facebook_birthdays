@@ -47,6 +47,8 @@ qplot(x = dates, data = fb, binwidth = 24 * 3600 * binw_days,
 
 There are some peaks and valleys such as in March (peak) and July/August (valley) but no obvious pattern.
 
+*Note*: The data contains a year (2014) but this only corresponds to the year when the data was generated and should be disregarded.
+
 # Individual birthdays
 
 Let's look for the days with the most birthdays:
@@ -65,3 +67,24 @@ print(fb_grp[fb_grp$dates == ymd("2014-02-23"), ])
 ```
 
 So my birthday is actually a fairly busy day, with 7 people sharing it.
+
+# Analysis by month
+
+We will now look into the data in more detail by breaking it down by month and calendar day. To that end, let's transform the dataset:
+
+```{r}
+# Create a new dataset with individual columns for months and days:
+fb_md <- fb %>% mutate(b_month = month(dates), b_day = day(dates)) %>% select(-dates)
+head(fb_md)
+```
+
+How are birthdays distributed by month?
+
+```{r}
+qplot(x = b_month, data = fb_md, binwidth = 1,
+      color = I('black'), fill = I('thistle')) +
+    scale_x_continuous(limits = c(1, 12), breaks = seq(1, 12, 1)) +
+    xlab("Month") + ylab("Birthday count")
+    theme_minimal()
+```
+
